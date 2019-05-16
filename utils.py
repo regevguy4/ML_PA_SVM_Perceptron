@@ -1,4 +1,3 @@
-from numpy.random.mtrand import shuffle
 import numpy as np
 
 
@@ -72,6 +71,7 @@ def train(perceptron, train_set, epochs):
         x_train, y_train = train_set[:, :-1], train_set[:, -1]
 
         for x, y in zip(x_train, y_train):
+
             perceptron.train(x, y)
 
 
