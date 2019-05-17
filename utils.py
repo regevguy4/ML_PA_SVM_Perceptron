@@ -1,3 +1,4 @@
+import random as rand
 import numpy as np
 
 
@@ -46,6 +47,11 @@ def load_dset(examples_path, labels_path):
     """
 
     examples = load_samples(examples_path)
+
+    # add single bias column for each sample .
+    arr = np.ones((examples.shape[0], 1))
+    examples = np.c_[examples, arr]
+
     labels = load_labels(labels_path)
 
     return np.c_[examples, labels]
@@ -67,7 +73,8 @@ def train(perceptron, train_set, epochs):
 
     for i in range(epochs):
 
-        # shuffle(train_set)
+        # rand.seed(4)
+        # rand.shuffle(train_set)
         x_train, y_train = train_set[:, :-1], train_set[:, -1]
 
         for x, y in zip(x_train, y_train):
@@ -84,14 +91,13 @@ def test(perceptron, dset):
 
     errors = 0
     x_val, y_val = dset[:, :-1], dset[:, -1]
+
     for x, y in zip(x_val, y_val):
 
         if not perceptron.test(x, y):
             errors = errors + 1
 
     loss = float(errors) / dset.shape[0]
+    print(str((1 - loss) * 100) + " % of accuracy")
 
-    print("number of errors on validation set is: " + str(errors))
-    print("the size of validation set is: " + str(dset.shape[0]))
-    print("the Loss Function returns: " + str(loss))
-    print("which means: " + str((1 - loss) * 100) + " % of accuracy")
+    return (1 - loss) * 100

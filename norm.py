@@ -2,6 +2,7 @@ import numpy as np
 
 
 # returns the params of the normalization on the data_set .
+# assuming - 'dset' is the whole data set - including the labels !
 def minmax_params(dset):
     features = dset.shape[1] - 1
 
@@ -12,9 +13,13 @@ def minmax_params(dset):
         old_mins[i] = np.amin(dset[:, i])
         denoms[i] = np.amax(dset[:, i]) - old_mins[i]
 
+        if denoms[i] == 0:
+            denoms[i] = 1 / dset.shape[0]
+
     return old_mins, denoms
 
 
+# assuming - 'dset' is the whole data set - including the labels !
 def minmax(dset, new_min, new_max, old_mins=None, denoms=None):
     _dset = np.copy(dset)
     features = _dset.shape[1] - 1
@@ -24,6 +29,9 @@ def minmax(dset, new_min, new_max, old_mins=None, denoms=None):
         for i in range(features):
             old_min = np.amin(_dset[:, i])
             denom = np.amax(_dset[:, i]) - old_min
+
+            if denom == 0:
+                denom = 1 / _dset.shape[0]
 
             value = (_dset[:, i] - old_min) / denom
 
@@ -40,7 +48,6 @@ def minmax(dset, new_min, new_max, old_mins=None, denoms=None):
 
 
 def zscore_params(dset):
-
     """
     :param dset: the data set which working on.
     :return: the params of the normalization on 'dset'.
@@ -59,7 +66,6 @@ def zscore_params(dset):
 
 
 def zscore(dset, train_means=None, train_stds=None):
-
     """
     :param dset: the data set which we like to normalize.
     :param train_means: (optional) the means of the features of the train set.

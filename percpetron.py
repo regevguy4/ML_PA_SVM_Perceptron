@@ -3,10 +3,10 @@ import numpy as np
 
 class Perceptron:
 
-    def __init__(self, num_features=10, num_classes=3):
+    def __init__(self, num_features=11, num_classes=3):
 
         self.weights = np.zeros((num_classes, num_features))
-        self.eta = 1
+        self.eta = 0.01
 
     def train(self, x, y):
 
