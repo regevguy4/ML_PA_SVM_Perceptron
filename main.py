@@ -1,6 +1,8 @@
-import norm
 import utils
-from percpetron import Perceptron
+import norm
+from SVM import SVM
+from perceptron import perceptron
+from PA import PA
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +26,10 @@ def cross_validate(n_epochs, _min, _max, groups):
 
         train_set = None
         valid_set = np.copy(groups[i])  # the validation set for th i'th iteration.
-        p = Perceptron()  # a new (!) perceptron object.
+
+        # p = perceptron()  # a new (!) perceptron object.
+        # svm = SVM(eta=0.999, c=0.01)
+        pa = PA()
 
         for j in range(k):
 
@@ -35,18 +40,21 @@ def cross_validate(n_epochs, _min, _max, groups):
                 else:
                     train_set = np.concatenate((train_set, groups[j]), axis=0)
 
-        # normalizing the train set and the valid set.
-        # old_mins, denoms = norm.minmax_params(train_set)
-        # train_set = norm.minmax(train_set, _min, _max)
-        # valid_set = norm.minmax(valid_set, _min, _max, old_mins, denoms)
+        mins, denoms = norm.minmax_params(train_set)
+        train_set = norm.minmax(train_set, _min, _max)
+        valid_set = norm.minmax(valid_set, _min, _max, mins, denoms)
 
         # training the model with the i'th training set.
-        utils.train(p, train_set, n_epochs)
+        # utils.train(p, train_set, n_epochs)
+        # utils.train(svm, train_set, n_epochs)
+        utils.train(pa, train_set, n_epochs)
 
         # printing the result of the i'th test on the validation set,
         # and saving the sum.
         print("iteration number " + str(i + 1) + " : ", end='')
-        _sum += utils.test(p, valid_set)
+        # _sum += utils.test(p, valid_set)
+        # _sum += utils.test(svm, valid_set)
+        _sum += utils.test(pa, valid_set)
 
     accuracy = float(_sum) / k
 
@@ -94,12 +102,13 @@ Main method
 """
 
 n_groups = 5
-max_epochs = 70
+max_epochs = 40
 
-n_min = 5
-n_max = 10
+n_min = 4
+n_max = 30
 
 data = utils.load_dset("train_x.txt", "train_y.txt")
-_groups = np.copy(np.array_split(data, n_groups))
 
+_groups = np.copy(np.array_split(data, n_groups))
 plot_epochs(max_epochs, n_min, n_max, _groups)
+

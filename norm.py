@@ -62,6 +62,9 @@ def zscore_params(dset):
         old_means[i] = np.mean(dset[:, i])
         old_stds[i] = np.std(dset[:, i])
 
+        if old_stds[i] == 0:
+            old_stds[i] = 1 / dset.shape[0]
+
     return old_means, old_stds
 
 
@@ -82,8 +85,10 @@ def zscore(dset, train_means=None, train_stds=None):
             mean = np.mean(_dset[:, i])
             stand_dev = np.std(_dset[:, i])
 
-            if stand_dev != 0:
-                _dset[:, i] = (_dset[:, i] - mean) / stand_dev
+            if stand_dev == 0:
+                stand_dev = 1 / dset.shape[0]
+
+            _dset[:, i] = (_dset[:, i] - mean) / stand_dev
 
         return _dset
 

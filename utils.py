@@ -1,4 +1,3 @@
-import random as rand
 import numpy as np
 
 
@@ -73,13 +72,16 @@ def train(perceptron, train_set, epochs):
 
     for i in range(epochs):
 
-        # rand.seed(4)
-        # rand.shuffle(train_set)
+        np.random.seed(4)
+        np.random.shuffle(train_set)
+
         x_train, y_train = train_set[:, :-1], train_set[:, -1]
 
         for x, y in zip(x_train, y_train):
 
             perceptron.train(x, y)
+
+        # perceptron.eta = perceptron.eta ** 2
 
 
 def test(perceptron, dset):
