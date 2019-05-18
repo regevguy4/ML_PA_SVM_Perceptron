@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class perceptron:
+class Perceptron:
 
     def __init__(self, num_features=11, num_classes=3):
 
@@ -18,12 +18,9 @@ class perceptron:
             self.weights[int(y), :] = self.weights[int(y), :] + self.eta * x
             self.weights[y_hat, :] = self.weights[y_hat, :] - self.eta * x
 
-    def test(self, x, y):
+    def test(self, x):
 
         y_hat = np.argmax(np.dot(self.weights, x))
 
-        if y != y_hat:
-            return False
-        else:
-            return True
+        print("perceptron: " + str(y_hat) + ", ", end='')
 

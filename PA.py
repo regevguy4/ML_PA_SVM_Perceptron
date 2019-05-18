@@ -27,12 +27,10 @@ class PA:
             self.w[int(y), :] = self.w[int(y), :] + self.tao * x
             self.w[y_hat, :] = self.w[y_hat, :] - self.tao * x
 
-    def test(self, x, y):
+    def test(self, x):
 
         # predict
         y_hat = np.argmax(np.dot(self.w, x))
 
-        if y != y_hat:
-            return False
-        else:
-            return True
+        print("pa: " + str(y_hat))
+

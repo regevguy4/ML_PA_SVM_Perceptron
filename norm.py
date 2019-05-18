@@ -1,9 +1,12 @@
 import numpy as np
 
 
-# returns the params of the normalization on the data_set .
-# assuming - 'dset' is the whole data set - including the labels !
 def minmax_params(dset):
+    """
+    assuming - 'dset' is the whole data set - including the labels !
+    :param dset: the data set which we like to get it's min max norm parameters.
+    :return:  two arrays of mins and denoms, which are the min-max norm params.
+    """
     features = dset.shape[1] - 1
 
     old_mins = np.zeros(features)
@@ -19,9 +22,18 @@ def minmax_params(dset):
     return old_mins, denoms
 
 
-# assuming - 'dset' is the whole data set - including the labels !
 def minmax(dset, new_min, new_max, old_mins=None, denoms=None):
+    """
+    :param dset: the data which we like to norm.
+    :param new_min: the new minimum for the norm.
+    :param new_max: the new maximum for the norm.
+    :param old_mins: optional - for the case of normalize the test set.
+    :param denoms: optional - for the case of normalize the test set.
+    :return: a copy of 'dset', only normalized.
+    """
     _dset = np.copy(dset)
+
+    # for the case where 'dset' is the train set, which includes the labels too.
     features = _dset.shape[1] - 1
 
     if old_mins is None and denoms is None:
@@ -39,6 +51,8 @@ def minmax(dset, new_min, new_max, old_mins=None, denoms=None):
 
         return _dset
 
+    # the case that 'dset' is a test set, with no labels column.
+    features += 1
     for i in range(features):
         value = (_dset[:, i] - old_mins[i]) / denoms[i]
 

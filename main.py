@@ -1,114 +1,66 @@
 import utils
 import norm
 from SVM import SVM
-from perceptron import perceptron
+from perceptron import Perceptron
 from PA import PA
 
+import sys
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def cross_validate(n_epochs, _min, _max, groups):
-    """
-    :param n_epochs: number of epochs.
-    :param _min: min value for normalization.
-    :param _max: max value for normalization.
-    :param groups: groups: array of equal sized numpy matrices.
-    :return: run groups.shape[0] times, and each time takes a different group
-    to be the validation set, and all the rest are the training set. trains new
-    perceptron alg' and print its accuracy. returns the average accuracy.
-    """
+def train(train_set, per, svm, pa, epochs):
+    for i in range(epochs):
 
-    k = groups.shape[0]
-    _sum = 0
+        # shuffle the training set .
+        np.random.seed(4)
+        np.random.shuffle(train_set)
 
-    for i in range(k):
+        # splitting the training set to examples and labels.
+        x_train, y_train = train_set[:, :-1], train_set[:, -1]
 
-        train_set = None
-        valid_set = np.copy(groups[i])  # the validation set for th i'th iteration.
+        for x, y in zip(x_train, y_train):
+            # training each algorithm.
+            per.train(x, y)
+            svm.train(x, y)
+            pa.train(x, y)
 
-        # p = perceptron()  # a new (!) perceptron object.
-        # svm = SVM(eta=0.999, c=0.01)
-        pa = PA()
-
-        for j in range(k):
-
-            if j != i:
-                # arange the train set for the i'th iteration.
-                if train_set is None:
-                    train_set = np.copy(groups[j])
-                else:
-                    train_set = np.concatenate((train_set, groups[j]), axis=0)
-
-        mins, denoms = norm.minmax_params(train_set)
-        train_set = norm.minmax(train_set, _min, _max)
-        valid_set = norm.minmax(valid_set, _min, _max, mins, denoms)
-
-        # training the model with the i'th training set.
-        # utils.train(p, train_set, n_epochs)
-        # utils.train(svm, train_set, n_epochs)
-        utils.train(pa, train_set, n_epochs)
-
-        # printing the result of the i'th test on the validation set,
-        # and saving the sum.
-        print("iteration number " + str(i + 1) + " : ", end='')
-        # _sum += utils.test(p, valid_set)
-        # _sum += utils.test(svm, valid_set)
-        _sum += utils.test(pa, valid_set)
-
-    accuracy = float(_sum) / k
-
-    # prints the average accuracy of the cross validation.
-    print("the average accuracy of this session: " + str(accuracy) + " %\n")
-    print("---------\n")
-
-    return accuracy
+        # updating the learning rate for the perceptron and SVM.
+        per.eta = per.eta ** 2
+        svm.eta = svm.eta ** 2
 
 
-def plot_epochs(max_ep, _min, _max, groups):
-    """
-    :param max_ep: the maximum num of epochs to be checked.
-    :param _min: the min value for the normalization
-    :param _max: the max value for the normalization
-    :param groups: array of equal sized numpy matrices.
-    :return: none, but print to the screen a graph of the average
-    accuracy as a function of the numbers of epochs.
-    """
-    arr = np.zeros((max_ep, 2))
+def predict(test_set, per, svm, pa):
 
-    # creating arr for showing accuracy as number of iterations
-    for ep in range(max_ep):
-        print("epoch number: " + str(ep))
-
-        arr[ep, 0] = ep
-
-        # cross_validate returning the average accuracy of the session,
-        # and print some information on the session .
-        arr[ep, 1] = cross_validate(ep, _min, _max, groups)
-
-    # plotting the array.
-    plt.plot(arr[:, 0], arr[:, 1])
-    plt.show()
-
-    # printing the max accuracy.
-    print("the max accuracy is:" + str(max(arr[:, 1]))
-          + " at epoch = " + str(np.argmax(arr[:, 1])))
+    for x in test_set:
+        per.test(x)
+        svm.test(x)
+        pa.test(x)
 
 
-"""
+def main(argv):
 
-Main method
+    # creating the algorithms. the optimal hyper-parameters are hardcoded.
+    per = Perceptron()
+    svm = SVM()
+    pa = PA()
 
-"""
+    # loading the train set, including the labels on the rightmost column.
+    train_set = utils.load_dset(argv[0], argv[1])
 
-n_groups = 5
-max_epochs = 40
+    # loading the test set. add a right column of ones for the bias
+    test_x = utils.load_samples(argv[2])
 
-n_min = 4
-n_max = 30
+    # normalizing the train and the test sets with min-max norm. min = 4, max = 30.
+    mins, denoms = norm.minmax_params(train_set)
+    train_set = norm.minmax(train_set, 4, 30)
+    test_x = norm.minmax(test_x, 4, 30, mins, denoms)
 
-data = utils.load_dset("train_x.txt", "train_y.txt")
+    # training the algorithms .
+    train(train_set, per, svm, pa, 100)
 
-_groups = np.copy(np.array_split(data, n_groups))
-plot_epochs(max_epochs, n_min, n_max, _groups)
+    # predicting and printing the results on the test set.
+    predict(test_x, per, svm, pa)
 
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

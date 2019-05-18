@@ -3,7 +3,7 @@ import numpy as np
 
 class SVM:
 
-    def __init__(self, eta=0.1, c=1, n_features=11, n_classes=3):
+    def __init__(self, eta=0.9999, c=0.01, n_features=11, n_classes=3):
 
         self.weights = np.zeros((n_classes, n_features))
 
@@ -27,12 +27,10 @@ class SVM:
             other = 3 - int(y) - y_hat
             self.weights[other, :] = update * self.weights[other, :]
 
-    def test(self, x, y):
+    def test(self, x):
 
         # predict
         y_hat = np.argmax(np.dot(self.weights, x))
 
-        if y != y_hat:
-            return False
-        else:
-            return True
+        print("svm: " + str(y_hat) + ", ", end='')
+

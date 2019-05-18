@@ -6,22 +6,22 @@ def load_samples(path):
     """
     for loading the samples, and returning it as an np Array.
     """
-
     with open(path, "r") as f:
         arr = [[str(num) for num in line.split(',')] for line in f]
 
     np_arr = np.copy(arr)
+    n_samples = np_arr.shape[0]  # the number of samples.
 
     gender = np_arr[:, 0]  # gets array of ganders (the 0'th col).
     np_arr = np_arr[:, 1:].astype(float)  # gets array of all of the numeric values.
+    np_arr = np.c_[np_arr, np.ones((n_samples, 1))]   # add right col of ones for bias.
 
-    samples = np_arr.shape[0]  # the number of samples.
-    one_hot = np.zeros((samples, 3))  # creating the one hot encoded array.
+    one_hot = np.zeros((n_samples, 3))  # creating the one hot encoded array.
 
     dic = {'M': 0, 'F': 1, 'I': 2}
 
     # converting genders to their encoded value.
-    for i in range(samples):
+    for i in range(n_samples):
         g = gender[i]
         one_hot[i, dic[g]] = 1
 
@@ -47,10 +47,6 @@ def load_dset(examples_path, labels_path):
 
     examples = load_samples(examples_path)
 
-    # add single bias column for each sample .
-    arr = np.ones((examples.shape[0], 1))
-    examples = np.c_[examples, arr]
-
     labels = load_labels(labels_path)
 
     return np.c_[examples, labels]
@@ -64,7 +60,7 @@ def split_dset(d_set, line):
     return arr, arr2
 
 
-def train(perceptron, train_set, epochs):
+def train(alg, train_set, epochs):
 
     """
     training the perceptron.
@@ -79,12 +75,12 @@ def train(perceptron, train_set, epochs):
 
         for x, y in zip(x_train, y_train):
 
-            perceptron.train(x, y)
+            alg.train(x, y)
 
-        # perceptron.eta = perceptron.eta ** 2
+        alg.eta = alg.eta ** 2
 
 
-def test(perceptron, dset):
+def test(alg, dset):
 
     """
     testing the perceptron on the validation set,
@@ -96,7 +92,7 @@ def test(perceptron, dset):
 
     for x, y in zip(x_val, y_val):
 
-        if not perceptron.test(x, y):
+        if not alg.test(x, y):
             errors = errors + 1
 
     loss = float(errors) / dset.shape[0]
